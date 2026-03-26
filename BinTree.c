@@ -164,3 +164,42 @@ TNo* BT_sucessor(TNo* root){
 
     return current;
 }
+
+void BT_transplant(BinTree* tree, TNo* no1, TNo* no2){
+    if (!no1->parent){
+        tree->root = no2;
+    }
+    else if (no1 == no1->parent->left){
+        no1->parent->left = no2;
+    }
+    else{
+        no1->parent->right = no2;
+    }
+    if (no2 != NULL){
+        no2->parent = no1->parent;
+    }
+}
+
+bool BT_remove(BinTree* tree, TNo* no){
+    if (!tree || !no) return false;
+    
+    if (no->left == NULL){
+        BT_transplant(tree, no, no->right);
+    }
+    else if (no->right == NULL){
+        BT_transplant(tree, no, no->left);
+    }
+    else{
+        TNo* current = BT_min(no->right);
+        if (current->parent != no){
+            BT_transplant(tree, current, current->right);
+            current->right = no->right;
+            current->right->parent = current;
+        }
+        BT_transplant(tree, no, current);
+        current->left = no->left;
+        current->left->parent = current;
+    }
+    free(no);
+    return true;
+}
