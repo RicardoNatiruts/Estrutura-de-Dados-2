@@ -57,7 +57,7 @@ bool BT_insert(BinTree* tree, int info){
         tree->root = new;
     }
 
-    if (ante->key > new->key){
+    else if (ante->key > new->key){
         ante->left = new;
     }
     else{
@@ -70,7 +70,7 @@ bool BT_insert(BinTree* tree, int info){
 void BT_pre(TNo* root){
     if(!root) return;
 
-    printf("%d", root->key);
+    printf("[%d] ", root->key);
     if (root->left){
         BT_pre(root->left);
     }
@@ -86,7 +86,7 @@ void BT_in(TNo* root){
     if (root->left){
         BT_in(root->left);
     }
-    printf("%d", root->key);
+    printf("[%d] ", root->key);
     if (root->right){
         BT_in(root->right);
     }
@@ -102,7 +102,7 @@ void BT_pos(TNo* root){
     if (root->right){
         BT_pos(root->right);
     }
-    printf("%d", root->key);
+    printf("[%d] ", root->key);
     return;
 };
 
