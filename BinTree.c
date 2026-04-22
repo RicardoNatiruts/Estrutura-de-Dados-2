@@ -165,6 +165,43 @@ TNo* BT_sucessor(TNo* root){
     return current;
 }
 
+
+TNo* BT_sucessor_sem_pai(Tno* root, Tno* target){
+    if(!root || !target) return NULL;
+
+    if (root->right){
+        return BT_min(root->right);
+    }
+
+    TNo* current = root;
+    TNo* sucessor = NULL;
+    while (current != NULL){
+        if (current->key > target->key){
+            sucessor = current;
+            current = current->left;
+        }
+        else if(current->key < target->key){
+            current->right;
+        }
+        else{
+            break;
+        }
+        
+    }
+
+    return sucessor;
+    
+
+}
+
+
+
+
+
+//coloca o no2 como root caso NULL(if)
+//coloca como filho a esquerda (else if)
+//coloca como filho a direira(else)
+//coloca o parente no1 como parente nó 2
 void BT_transplant(BinTree* tree, TNo* no1, TNo* no2){
     if (!no1->parent){
         tree->root = no2;
@@ -203,3 +240,44 @@ bool BT_remove(BinTree* tree, TNo* no){
     free(no);
     return true;
 }
+
+
+void BT_printf_linha(TNo* root){
+    if(!root) return;
+
+    TNo* fila[1000];
+    int inicio = 0;
+    int fim = 0;
+
+    fila[fim++] = root;
+
+    while(inicio < fim){
+        int tamanho_nivel = fim - inicio;
+
+        for (int i = 0; i < tamanho_nivel; i++){
+            TNo* atual = fila[inicio++];
+            printf("%d ", atual->key);
+
+            if(atual->letf != NULL) fila[fim++] = atual->left;
+            if(atual->right != NULL) fila[fim++] = atual->rigth;
+        }
+        printf("\n");
+    }
+    
+}
+
+int BT_altura(TNo* root){
+    if(!root) return -1;
+
+    int altDir = BT_altura(root->right);
+    int altEsq = BT_altura(root->left);
+
+    if (altDir > altEsq){
+        return altDir + 1;
+    }
+    else {
+        return altEsq + 1;
+    }
+    
+}
+
