@@ -7,6 +7,7 @@ typedef struct _no{
     TNo* parent;
     TNo* right;
     TNo* left;
+    int altura;
 }TNo;
 
 struct __binTree{
@@ -20,6 +21,7 @@ TNo* TNo_createFill(int info){
         new->left = NULL;
         new->parent = NULL;
         new->right =NULL;
+        new->altura = 1;
     }
     return new;
 };
@@ -166,7 +168,7 @@ TNo* BT_sucessor(TNo* root){
 }
 
 
-TNo* BT_sucessor_sem_pai(Tno* root, Tno* target){
+TNo* BT_sucessor_sem_pai(TNo* root, TNo* target){
     if(!root || !target) return NULL;
 
     if (root->right){
@@ -258,8 +260,8 @@ void BT_printf_linha(TNo* root){
             TNo* atual = fila[inicio++];
             printf("%d ", atual->key);
 
-            if(atual->letf != NULL) fila[fim++] = atual->left;
-            if(atual->right != NULL) fila[fim++] = atual->rigth;
+            if(atual->left != NULL) fila[fim++] = atual->left;
+            if(atual->right != NULL) fila[fim++] = atual->right;
         }
         printf("\n");
     }
@@ -281,3 +283,116 @@ int BT_altura(TNo* root){
     
 }
 
+int altura(TNo* root){
+    if(!root) return 0;
+    return root->altura;
+}
+
+int maior(int a, int b){
+    return (a>b) ? a:b;
+}
+
+TNo* rotacaoEsquerda(TNo* root){
+    TNo* y = root->right;
+    TNo* T2 = y->left;
+
+    y->left = root;
+    root->right = T2;
+
+    root-> altura = maior(altura(root->right), altura(root->left));
+    y-> altura = maior(altura(y->right), altura(y->left));
+
+    return root;
+}
+
+TNo* rotacaoDireita(TNo* root){
+    TNo* y = root->left;
+    TNo* T2 = y->right;
+
+    y->right = root;
+    root->left = T2;
+
+    root->altura = maior(altura(root->right), altura(root->left));
+    y->altura = maior(altura(y->right), altura(root->left));
+
+    return y;
+}
+
+TNo* rotacaoDuplaDireita(TNo* root){
+    root->left = rotaçaoEsquerda(root->left);
+    return rotaçaoDireita(root);
+}
+
+TNo* rotacaoDuplaEsquerda(TNo* root){
+    root->right = rotaçaoDireita(root->right);
+    return rotacaoEsquerda(root);
+}
+
+bool AVLT_insert(BinTree* tree, int info){
+    if(!tree) return false;
+
+    TNo* new = TNo_createFill(info);
+    if(new){
+        TNo* current = tree->root;
+        TNo* ante = NULL;
+
+        while (current != NULL){
+            ante = current;
+            if (new->key > current->key){
+                current = current->right;
+            }
+            else if(current->key > new->key){
+                current = current->left;
+            }
+            else{
+                return false;
+            }
+        }
+         new->parent = ante;
+
+        if (!ante){
+            tree->root = new;
+        }
+
+        else if (ante->key > new->key){
+            ante->left = new;
+        }
+        else{
+            ante->right = new;
+        }
+
+        int alt_dir = (ante->right == NULL) ? 0 : ante->right->altura;
+        int alt_esq = (ante->left == NULL) ? 0 : ante->left->altura;
+
+        ante->altura = (alt_dir > alt_esq) ? alt_dir+1 : alt_esq+1;
+        
+
+        int fb = alt_dir - alt_esq;
+
+        if (fb == -2){
+
+            int fb_filho = altura(ante->left->right) - altura(ante->left->left);
+
+            if (fb_filho <= 0){
+                ante = rotacaoDireita(ante);
+            }
+            else{
+                ante = rotacaoDuplaDireita(ante);
+            }
+        }
+        if (fb == 2){
+
+            int fb_filho = altura(ante->right->right) - altura(ante->right->left);
+
+            if (fb_filho >= 0){
+                ante = rotacaoEsquerda(ante);
+            }
+            else{
+                ante = rotacaoDuplaEsquerda(ante);
+            }
+            
+        }
+        return true;
+    }
+    return false;
+}
