@@ -209,3 +209,119 @@ void RbTree_PrintLevel(RedBlackTree* tree){
         printf("\n");   
     }    
 }
+
+void RbTree_Transplant(RedBlackTree* tree, TNo* no1, TNo* no2){
+    if(no1->parent == tree->nil){
+        tree->root = no2;
+    }
+    if(no1 = no1->parent->left){
+        no1->parent->left = no2;
+    }
+    else{
+        no1->parent->right = no2;
+    }
+    no2->parent = no1->parent;
+}
+
+TNo* RbTree_Minimun(RedBlackTree* tree, TNo* current){
+    while (current->left != tree->nil){
+        current = current->left;
+    }
+    return current;
+}
+
+void RbTree_Delete_Fixup(RedBlackTree* tree, TNo* current){
+    while (current != tree->root && current->color == NODE_BLACK){
+        if(current == current->parent->left){
+            TNo* sibling = current->parent->right;
+            if(sibling->color == NODE_RED){
+                sibling->color = NODE_BLACK;
+                current->parent->color = NODE_RED;
+                RbTree_Rotate_Left(tree, current->parent);
+                sibling = current->parent->right;
+            }
+            if(sibling->left->color == NODE_BLACK && sibling->right->color == NODE_BLACK){
+                sibling->color = NODE_RED;
+                current = current->parent;
+            }
+            else{
+                if(sibling->right->color == NODE_BLACK){
+                    sibling->left->color = NODE_BLACK;
+                    sibling->color = NODE_RED;
+                    RbTree_Rotate_Right(tree, sibling);
+                    sibling = current->parent->right;
+                }
+                sibling->color = current->parent->color;
+                current->parent->color = NODE_BLACK;
+                sibling->right->color = NODE_BLACK;
+                RbTree_Rotate_Left(tree, current->parent);
+                current = tree->root;
+            }
+        }
+        else{
+            TNo* sibling = current->parent->left;
+            if(sibling->color == NODE_RED){
+                sibling->color = NODE_BLACK;
+                current->parent->color = NODE_RED;
+                RbTree_Rotate_Right(tree, current->parent);
+                sibling = current->parent->left;
+            }
+            if(sibling->right->color == NODE_BLACK && sibling->left->color == NODE_BLACK){
+                sibling->color = NODE_RED;
+                current = current->parent;
+            }
+            else{
+                if(sibling->left->color == NODE_BLACK){
+                    sibling->right->color = NODE_BLACK;
+                    sibling->color = NODE_BLACK;
+                    RbTree_Rotate_Left(tree, sibling);
+                    sibling = current->parent->left;
+                }
+                sibling->color = current->parent->color;
+                current->parent->color = NODE_BLACK;
+                sibling->left->color = NODE_BLACK;
+                RbTree_Rotate_Right(tree, current->parent);
+                current = tree->root;
+            }
+        }
+    }
+    current->color = NODE_BLACK;
+    return;
+}
+
+bool RbTree_Delete(RedBlackTree* tree, TNo* root){
+    TNo* current = root;
+    TNo* child = tree->nil;
+    NodeColor current_color = current->color;
+    if(root->left == tree->nil){
+        child = root->right;
+        RbTree_Transplant(tree, root, root->right);
+    }
+    else if (root->right == tree->nil){
+        child = root->left;
+        RbTree_Transplant(tree, root, root->left);
+    }
+    else{
+        current = RbTree_Minimun(tree, root->right);
+        current_color = current->color;
+        child = current->right;
+        if(current != root->right){
+            RbTree_Transplant(tree, current, current->right);
+            current->right = root->right;
+            current->right->parent = current;
+        }
+        else{
+            child->parent = current;
+            RbTree_Transplant(tree, root, current);
+            current->left = root->left;
+            current->left->parent = current;
+            current->color = root->color;
+        }
+    }
+
+    if(current_color == NODE_BLACK){
+        RbTree_Delete_Fixup(tree, child);
+    }
+    free(root);
+    return true;
+}
