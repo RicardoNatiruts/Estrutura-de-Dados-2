@@ -289,39 +289,39 @@ void RbTree_Delete_Fixup(RedBlackTree* tree, TNo* current){
     return;
 }
 
-bool RbTree_Delete(RedBlackTree* tree, TNo* root){
-    TNo* current = root;
+bool RbTree_Delete(RedBlackTree* tree, TNo* target){
+    TNo* current = target;
     TNo* child = tree->nil;
     NodeColor current_color = current->color;
-    if(root->left == tree->nil){
-        child = root->right;
-        RbTree_Transplant(tree, root, root->right);
+    if(target->left == tree->nil){
+        child = target->right;
+        RbTree_Transplant(tree, target, target->right);
     }
-    else if (root->right == tree->nil){
-        child = root->left;
-        RbTree_Transplant(tree, root, root->left);
+    else if (target->right == tree->nil){
+        child = target->left;
+        RbTree_Transplant(tree, target, target->left);
     }
     else{
-        current = RbTree_Minimun(tree, root->right);
+        current = RbTree_Minimun(tree, target->right);
         current_color = current->color;
         child = current->right;
-        if(current != root->right){
+        if(current->parent = target){
             RbTree_Transplant(tree, current, current->right);
-            current->right = root->right;
+            current->right = target->right;
             current->right->parent = current;
         }
         else{
             child->parent = current;
-            RbTree_Transplant(tree, root, current);
-            current->left = root->left;
-            current->left->parent = current;
-            current->color = root->color;
         }
+        RbTree_Transplant(tree, target, current);
+        current->left = target->left;
+        current->left->parent = current;
+        current->color = target->color;
     }
 
     if(current_color == NODE_BLACK){
         RbTree_Delete_Fixup(tree, child);
     }
-    free(root);
+    free(target);
     return true;
 }
