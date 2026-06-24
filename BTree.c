@@ -14,16 +14,29 @@ typedef struct _no{
     bool folha;
 }BNo;
 
+typedef struct _bTree{
+    BNo* raiz;
+}BTree;
+
+
 BNo* BTree_noCreate(){
     BNo* novo = malloc(sizeof(BNo));
     if (novo){
         novo->qtd = 0;
         novo->folha = true;
-
+        
         for (int i = 0; i < 2*termo; i++){
             novo->ponter[i] = NULL;
         }
         
+    }
+    return novo;
+}
+
+BTree* BTree_create(){
+    BTree* novo = malloc(sizeof(BTree));
+    if (novo){
+        novo->raiz = BTree_noCreate(); 
     }
     return novo;
 }
@@ -55,40 +68,48 @@ bool BTree_split(BNo* raiz, int indice){
     raiz->chaves[indice] = mediana;
     raiz->qtd++;
     
-    
+    return true;
 }
 
 bool BTree_insert_noFull(BNo* raiz, int chave){
+    int i = raiz->qtd-1;
     if (raiz->folha){
-        int j = 0;
-        for (int k = 0; k < max - 1; k++){
-            if(raiz->chaves[k] > chave){
-                j = k;
-                break;
-            }
-        }
-        for(int i = raiz->qtd-1; i >= j; i--){
+        while(i >= 0 && raiz->chaves[i] > chave){
             raiz->chaves[i + 1] = raiz->chaves[i];
-        }
-        raiz->chaves[j] = chave;
-        raiz->qtd++; 
-    }
-    else{
-        int i = raiz->qtd - 1;
-        while(i >= 0){
-            if (raiz->chaves[i] < chave){
-                i++;
-                break;
-            }
             i--;
         }
+        raiz->chaves[i + 1] = chave;
+        raiz->qtd++;
+        return true;
+
+    }
+    else{
+        while (i >= 0 && raiz->chaves[i] > chave){
+            i--;
+        }
+        i++;
+        
+        
         if(raiz->ponter[i]->qtd == max){
             BTree_split(raiz, i);
             if(raiz->chaves[i] < chave){
                 i++;
             }
         }
-        BTree_insert_noFull(raiz->ponter[i], chave);
+        return BTree_insert_noFull(raiz->ponter[i], chave);
     }
     
+}
+
+bool BTree_insert(BTree* arvore, int chave){
+    BNo* raiz = arvore->raiz;
+    if(raiz->qtd == max){
+        BNo* current = BTree_noCreate();
+        arvore->raiz = current;
+        current->folha = false;
+        current->ponter[0] = raiz;
+        BTree_split(current, 0);
+        return BTree_insert_noFull(current, chave);
+    }
+    else return BTree_insert_noFull(raiz, chave);
 }
